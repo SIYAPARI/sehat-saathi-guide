@@ -1,3 +1,4 @@
+import { evaluateSymptoms } from "./lib/triage";
 import { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -27,6 +28,14 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [loading, setLoading] = useState(true);
+
+  // 🔽 TEMPORARY TEST (safe place)
+  const test = evaluateSymptoms({
+    symptoms: ["chest pain", "shortness of breath"]
+  });
+
+  console.log("Triage test:", test);
+  // 🔼 TEMPORARY TEST
 
   if (loading) {
     return <LoadingScreen onComplete={() => setLoading(false)} />;
