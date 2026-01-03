@@ -19,6 +19,24 @@ A comprehensive guide and resource platform for the SAATHI initiative at IIT Mad
 
 ---
 
+## 📸 UI Preview
+
+### 🏠 Home
+![Home Page](./screenshots/home.png)
+
+### 🤖 AI Assistant
+![AI Assistant](./screenshots/ai-assistant.png)
+
+### 💊 Medicine Store
+![Medicine Store](./screenshots/store.png)
+
+### 🩺 Health Suggestions
+![Health Suggestions](./screenshots/health-suggestions.png)
+
+### 📝 Symptom Tracker
+![Symptom Tracker](./screenshots/symptoms.png)
+
+
 ## 📋 Table of Contents
 
 - [About](#about)
