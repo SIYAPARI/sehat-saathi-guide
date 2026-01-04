@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Navigation, Phone, Clock, ExternalLink } from 'lucide-react';
+import { MapPin, Navigation, Phone, Clock } from 'lucide-react';
 
 interface Hospital {
   id: string;
@@ -92,6 +92,14 @@ const NearbyHospitals: React.FC = () => {
     window.open(url, '_blank');
   };
 
+  const defaultLat = 26.9124;
+  const defaultLng = 80.9558;
+  const mapLat = location?.lat ?? defaultLat;
+  const mapLng = location?.lng ?? defaultLng;
+
+  // OpenStreetMap embed URL
+  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${mapLng - 0.05},${mapLat - 0.03},${mapLng + 0.05},${mapLat + 0.03}&layer=mapnik&marker=${mapLat},${mapLng}`;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 text-center">
@@ -105,28 +113,33 @@ const NearbyHospitals: React.FC = () => {
         </p>
       </div>
 
-      {/* Map Placeholder */}
+      {/* OpenStreetMap Embed */}
       <Card className="mb-8 border-2 border-border overflow-hidden">
-        <div className="relative h-64 bg-muted flex items-center justify-center">
-          <div className="text-center">
-            <MapPin className="w-16 h-16 mx-auto text-primary mb-4" />
-            <p className="text-muted-foreground">
-              {loading
-                ? language === 'hi'
-                  ? 'स्थान खोज रहे हैं...'
-                  : 'Finding your location...'
-                : language === 'hi'
-                ? 'मैप यहां दिखाई देगा'
-                : 'Map will appear here'}
-            </p>
-            {location && (
-              <p className="text-sm text-muted-foreground mt-2">
-                📍 {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-              </p>
-            )}
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/50" />
+        <div className="relative h-64">
+          {loading ? (
+            <div className="h-full bg-muted flex items-center justify-center">
+              <div className="text-center">
+                <MapPin className="w-16 h-16 mx-auto text-primary mb-4 animate-pulse" />
+                <p className="text-muted-foreground">
+                  {language === 'hi' ? 'स्थान खोज रहे हैं...' : 'Finding your location...'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <iframe
+              title="Location Map"
+              src={mapUrl}
+              className="w-full h-64 border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          )}
         </div>
+        {location && (
+          <div className="p-3 bg-secondary/50 text-center text-sm text-muted-foreground">
+            📍 {language === 'hi' ? 'आपका स्थान' : 'Your location'}: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+          </div>
+        )}
       </Card>
 
       {/* Hospital List */}
@@ -162,7 +175,7 @@ const NearbyHospitals: React.FC = () => {
                 <Clock className="w-4 h-4 flex-shrink-0" />
                 <span>{hospital.hours}</span>
               </div>
-              
+
               <div className="flex gap-2 pt-2">
                 <Button
                   variant="outline"
