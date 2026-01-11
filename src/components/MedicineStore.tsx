@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dialog';
 
 import { toast } from 'sonner';
-import { Search, ShoppingCart, Star, Tag, X, Clock } from 'lucide-react';
+import { Search, ShoppingCart, Star, Tag, X, Clock, Package } from 'lucide-react';
 
 const MedicineStore: React.FC = () => {
   const navigate = useNavigate();
@@ -86,19 +86,19 @@ const MedicineStore: React.FC = () => {
     );
   };
 
-    // Handle search input change
+  // Handle search input change
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
-    // Don't save to history on every keystroke
   };
 
   // Handle Enter key press
-const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  if (e.key === 'Enter' && searchQuery.trim().length >= 2) {
-    saveSearchToHistory(searchQuery);
-    setShowHistory(false);
-  }
-};
+  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim().length >= 2) {
+      saveSearchToHistory(searchQuery);
+      setShowHistory(false);
+    }
+  };
+
   // Apply search from history
   const applyHistorySearch = (query: string) => {
     setSearchQuery(query);
@@ -158,19 +158,19 @@ const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
       {/* Search with History */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-      <Input
-        value={searchQuery}
-        onChange={(e) => handleSearchChange(e.target.value)}
-        onKeyDown={handleSearchSubmit}
-        onFocus={() => setShowHistory(true)}
-        onBlur={() => setTimeout(() => setShowHistory(false), 200)}
-        placeholder={t.search}
-        className="pl-10 h-12"
-      />
+        <Input
+          value={searchQuery}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          onKeyDown={handleSearchSubmit}
+          onFocus={() => setShowHistory(true)}
+          onBlur={() => setTimeout(() => setShowHistory(false), 200)}
+          placeholder={t.search}
+          className="pl-10 h-12 search-input-focus transition-all"
+        />
 
         {/* Search History Dropdown */}
         {showHistory && searchHistory.length > 0 && (
-          <div className="absolute z-10 w-full mt-2 bg-background border rounded-lg shadow-lg">
+          <div className="absolute z-10 w-full mt-2 bg-background border rounded-lg shadow-lg search-dropdown">
             <div className="p-3 border-b flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="w-4 h-4" />
@@ -182,7 +182,7 @@ const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
                 variant="ghost"
                 size="sm"
                 onClick={clearHistory}
-                className="h-6 text-xs"
+                className="h-6 text-xs hover:text-destructive transition-colors"
               >
                 {language === 'hi' ? 'सभी हटाएं' : 'Clear All'}
               </Button>
@@ -192,14 +192,14 @@ const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
               {searchHistory.map((item, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between px-3 py-2 hover:bg-muted cursor-pointer group"
+                  className="flex items-center justify-between px-3 py-2 cursor-pointer group search-history-item"
                   onClick={() => applyHistorySearch(item)}
                 >
                   <span className="text-sm">{item}</span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => {
                       e.stopPropagation();
                       removeFromHistory(item);
@@ -214,6 +214,24 @@ const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
         )}
       </div>
 
+      {/* Result Counter */}
+      {searchQuery && (
+        <div className="mb-4 flex items-center gap-2 result-counter">
+          <Badge variant="secondary" className="text-sm">
+            {language === 'hi'
+              ? `${filteredMedicines.length} दवाइयां मिलीं`
+              : `Found ${filteredMedicines.length} medicine${filteredMedicines.length !== 1 ? 's' : ''}`}
+          </Badge>
+          {filteredMedicines.length > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {language === 'hi'
+                ? `"${searchQuery}" के लिए`
+                : `for "${searchQuery}"`}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Categories */}
       <div className="flex flex-wrap gap-2 mb-8">
         {categories.map((category) => (
@@ -224,18 +242,43 @@ const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
               selectedCategory === category.id ? 'default' : 'outline'
             }
             onClick={() => setSelectedCategory(category.id)}
+            className="transition-all hover:scale-105"
           >
             {language === 'hi' ? category.nameHi : category.name}
           </Button>
         ))}
       </div>
 
+      {/* Empty State */}
+      {filteredMedicines.length === 0 && searchQuery && (
+        <div className="flex flex-col items-center justify-center py-16 empty-state">
+          <Package className="w-16 h-16 text-muted-foreground mb-4" />
+          <h3 className="text-xl font-semibold mb-2">
+            {language === 'hi' ? 'कोई दवाई नहीं मिली' : 'No medicines found'}
+          </h3>
+          <p className="text-muted-foreground text-center max-w-md mb-4">
+            {language === 'hi'
+              ? `"${searchQuery}" के लिए कोई परिणाम नहीं मिला। कृपया अलग खोजें या श्रेणी बदलें।`
+              : `No results found for "${searchQuery}". Try a different search term or category.`}
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSearchQuery('');
+              setSelectedCategory('all');
+            }}
+          >
+            {language === 'hi' ? 'सभी दवाइयां देखें' : 'View All Medicines'}
+          </Button>
+        </div>
+      )}
+
       {/* Products */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {filteredMedicines.map((medicine) => (
           <Card
             key={medicine.id}
-            className="cursor-pointer hover:shadow-lg"
+            className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
             onClick={() => {
               setSelectedMedicine(medicine);
               setIsModalOpen(true);
@@ -266,7 +309,7 @@ const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
               </h3>
 
               {genericComparison?.[medicine.name] && (
-                <Badge className="mb-2 bg-green-100 text-green-700">
+                <Badge className="mb-2 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-100">
                   Cheaper Generic Available
                 </Badge>
               )}
@@ -297,6 +340,7 @@ const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
                       );
                       setCompareOpen(true);
                     }}
+                    className="transition-all hover:scale-105"
                   >
                     Compare
                   </Button>
@@ -307,6 +351,7 @@ const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
                       e.stopPropagation();
                       handleAddToCart(medicine);
                     }}
+                    className="transition-all hover:scale-105"
                   >
                     <ShoppingCart className="w-4 h-4" />
                   </Button>
