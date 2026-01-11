@@ -40,6 +40,7 @@ const MedicineStore: React.FC = () => {
   const [compareOpen, setCompareOpen] = useState(false);
   const [compareData, setCompareData] = useState<any>(null);
 
+
   // Load search history from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('medicine-search-history');
@@ -326,15 +327,142 @@ const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
       {/* Medicine Detail Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {selectedMedicine &&
-                (language === 'hi'
-                  ? selectedMedicine.nameHi
-                  : selectedMedicine.name)}
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selectedMedicine && (
+            <div>
+              <DialogHeader>
+                <DialogTitle className="text-2xl mb-4">
+                  {language === 'hi'
+                    ? selectedMedicine.nameHi
+                    : selectedMedicine.name}
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Product Image */}
+                <div className="flex justify-center">
+                  <img
+                    src={selectedMedicine.image}
+                    alt={selectedMedicine.name}
+                    className="w-full h-64 object-contain rounded-lg"
+                  />
+                </div>
+                
+                {/* Product Details */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">
+                      {language === 'hi' ? 'विवरण' : 'Description'}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {language === 'hi'
+                        ? selectedMedicine.descriptionHi
+                        : selectedMedicine.description}
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Star className="w-5 h-5 fill-current text-warning" />
+                    <span className="font-medium">{selectedMedicine.rating} Rating</span>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary">
+                      {language === 'hi' ? 'कैटेगरी' : 'Category'}: {language === 'hi' 
+                        ? categories.find(c => c.id === selectedMedicine.category)?.nameHi 
+                        : categories.find(c => c.id === selectedMedicine.category)?.name}
+                    </Badge>
+                    <Badge variant="outline">
+                      {selectedMedicine.inStock 
+                        ? (language === 'hi' ? 'स्टॉक में' : 'In Stock') 
+                        : (language === 'hi' ? 'स्टॉक में नहीं' : 'Out of Stock')}
+                    </Badge>
+                  </div>
+                  
+                  <div className="text-2xl font-bold text-primary">
+                    ₹{selectedMedicine.price}
+                    {selectedMedicine.originalPrice > selectedMedicine.price && (
+                      <span className="ml-2 text-sm text-muted-foreground line-through">
+                        ₹{selectedMedicine.originalPrice}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {genericComparison?.[selectedMedicine.name] && (
+                    <Badge className="bg-green-500 text-white">
+                      {language === 'hi' 
+                        ? 'सस्ता जेनेरिक उपलब्ध' 
+                        : 'Cheaper Generic Available'}
+                    </Badge>
+                  )}
+                  
+                  {/* Expandable Medicine Details */}
+                  <div className="space-y-2 pt-2">
+                    <details className="group">
+                      <summary className="cursor-pointer font-semibold list-none flex justify-between items-center">
+                        {language === 'hi' ? 'उपयोग निर्देश' : 'Usage Instructions'}
+                        <span className="ml-2 group-open:rotate-180 transition-transform">▼</span>
+                      </summary>
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        {language === 'hi' 
+                          ? `सामान्य रूप से डॉक्टर की सलाह पर लें। सामान्य खुराक: ${selectedMedicine.name.includes('Paracetamol') ? '500mg, 3 बार दिन में' : selectedMedicine.name.includes('ORS') ? 'एक बूंद दिन में 3 बार' : 'जैसा डॉक्टर निर्धारित करे'}`
+                          : `Generally take as per doctor's advice. Typical dosage: ${selectedMedicine.name.includes('Paracetamol') ? '500mg, 3 times a day' : selectedMedicine.name.includes('ORS') ? 'One sachet dissolved in water, 3 times a day' : 'As prescribed by doctor'}`}
+                      </div>
+                    </details>
+                    
+                    <details className="group">
+                      <summary className="cursor-pointer font-semibold list-none flex justify-between items-center">
+                        {language === 'hi' ? 'सावधानियां' : 'Precautions'}
+                        <span className="ml-2 group-open:rotate-180 transition-transform">▼</span>
+                      </summary>
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        {language === 'hi' 
+                          ? 'खाली पेट लेने से बचें, यदि गर्भवती हों तो डॉक्टर से परामर्श करें।'
+                          : 'Avoid on empty stomach, consult doctor if pregnant.'}
+                      </div>
+                    </details>
+                    
+                    <details className="group">
+                      <summary className="cursor-pointer font-semibold list-none flex justify-between items-center">
+                        {language === 'hi' ? 'साइड इफेक्ट्स' : 'Side Effects'}
+                        <span className="ml-2 group-open:rotate-180 transition-transform">▼</span>
+                      </summary>
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        {language === 'hi' 
+                          ? 'मतली, चक्कर, त्वचा पर लाल चकत्ते।'
+                          : 'Nausea, dizziness, skin rashes.'}
+                      </div>
+                    </details>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                    <Button 
+                      className="flex-1"
+                      onClick={() => {
+                        handleAddToCart(selectedMedicine);
+                        setIsModalOpen(false);
+                      }}
+                    >
+                      {language === 'hi' ? 'खरीदें' : 'Buy Now'}
+                    </Button>
+                    
+                    <Button 
+                      variant="outline"
+                      className="flex-1"
+                      disabled={!genericComparison?.[selectedMedicine.name]}
+                      onClick={() => {
+                        setCompareData(genericComparison?.[selectedMedicine.name]);
+                        setCompareOpen(true);
+                        setIsModalOpen(false);
+                      }}
+                    >
+                      {language === 'hi' ? 'तुलना करें' : 'Compare'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
